@@ -3,111 +3,563 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulateur de Moyennes</title>
+    <title>Simulateur de Moyennes Universitaires</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f9;
-        }
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        h1, h2 {
-            color: #333;
-            border-bottom: 2px solid #ccc;
-            padding-bottom: 5px;
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eaeaea;
+        }
+
+        .section-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 18px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-body {
+            padding: 25px;
+            background-color: white;
+        }
+
+        .matiere-group {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            background-color: #f8f9ff;
+            border: 1px solid #e1e5f2;
+        }
+
+        .matiere-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #d1d9ff;
+        }
+
+        .matiere-header h3 {
+            color: var(--primary-dark);
+            font-size: 1.3rem;
+        }
+
+        .coef-badge {
+            background-color: var(--secondary);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .epreuves-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .epreuve-item {
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eaeaea;
+        }
+
+        .epreuve-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+
+        .epreuve-coef {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .note-input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #d1d9ff;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .note-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .note-input.invalid {
+            border-color: var(--warning);
+            box-shadow: 0 0 0 3px rgba(247, 37, 133, 0.2);
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-top: 20px;
         }
-        .matiere-group {
-            margin-bottom: 15px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
         }
-        input[type="number"] {
-            padding: 8px;
-            margin-right: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: 80px;
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
         }
+
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #3ab8d9;
+        }
+
         .resultat {
             margin-top: 15px;
-            padding: 10px;
-            border-radius: 4px;
-            font-size: 1.1em;
-            font-weight: bold;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
+
         .resultat.matiere {
             background-color: #e6f7ff;
             color: #0056b3;
+            border-left: 4px solid var(--success);
         }
+
         .resultat.groupe {
             background-color: #e6ffe6;
             color: #28a745;
-            font-size: 1.2em;
+            font-size: 1.3rem;
+            border-left: 4px solid #28a745;
+        }
+
+        .moyennes-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .moyenne-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .moyenne-input-group label {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .moyenne-input {
+            padding: 12px 15px;
+            border: 1px solid #d1d9ff;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background-color: #f8f9ff;
+        }
+
+        .progress-container {
+            margin-top: 30px;
+            background-color: #f8f9ff;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border: 1px solid #e1e5f2;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background-color: #e9ecef;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .stat-card {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            border: 1px solid #eaeaea;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--gray);
+            font-size: 0.9rem;
+            border-top: 1px solid #eaeaea;
+            background-color: #f8f9fa;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        @media (max-width: 768px) {
+            .epreuves-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .moyennes-inputs {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            header h1 {
+                font-size: 1.8rem;
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>📝 Simulateur de Moyennes</h1>
-    
-    <div id="calcul-matieres">
-        <h2>Mathématiques et Informatique</h2>
-        
-        <div class="matiere-group">
-            <h3>Mathématiques pour l'Ingénieur (Coefficient total du groupe Math : 7)</h3>
-            
-            <div id="math-details">
-                </div>
-            
-            <button onclick="calculerMoyenneMatiere('math')">Calculer Moyenne Math</button>
-            <div id="resultat-math" class="resultat matiere">Moyenne Math : -</div>
-        </div>
+    <header>
+        <h1><i class="fas fa-calculator"></i> Simulateur de Moyennes Universitaires</h1>
+        <p>Calculez vos moyennes même avec des notes manquantes</p>
+    </header>
 
-        <div class="matiere-group">
-            <h3>Informatique (Coefficient total du groupe Info : 3)</h3>
+    <div class="content">
+        <div class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-square-root-alt"></i> Mathématiques et Informatique</h2>
+                <div class="coef-badge">Coefficient Total: 10</div>
+            </div>
             
-            <div id="info-details">
+            <div class="section-body">
+                <div class="toggle-container">
+                    <span>Mode calcul partiel:</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="partial-mode">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span id="mode-status">Désactivé</span>
                 </div>
+
+                <div class="matiere-group">
+                    <div class="matiere-header">
+                        <h3><i class="fas fa-calculator"></i> Mathématiques pour l'Ingénieur</h3>
+                        <div class="coef-badge">Coefficient: 7</div>
+                    </div>
+                    
+                    <div class="epreuves-container" id="math-details">
+                        <!-- Les épreuves seront ajoutées dynamiquement -->
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="btn btn-secondary" onclick="reinitialiserMatiere('math')">
+                            <i class="fas fa-undo"></i> Réinitialiser
+                        </button>
+                        <button class="btn btn-primary" onclick="calculerMoyenneMatiere('math')">
+                            <i class="fas fa-calculator"></i> Calculer Moyenne Math
+                        </button>
+                    </div>
+                    
+                    <div id="resultat-math" class="resultat matiere">
+                        <i class="fas fa-info-circle"></i> Moyenne Math : -
+                    </div>
+                </div>
+
+                <div class="matiere-group">
+                    <div class="matiere-header">
+                        <h3><i class="fas fa-laptop-code"></i> Informatique</h3>
+                        <div class="coef-badge">Coefficient: 3</div>
+                    </div>
+                    
+                    <div class="epreuves-container" id="info-details">
+                        <!-- Les épreuves seront ajoutées dynamiquement -->
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="btn btn-secondary" onclick="reinitialiserMatiere('info')">
+                            <i class="fas fa-undo"></i> Réinitialiser
+                        </button>
+                        <button class="btn btn-primary" onclick="calculerMoyenneMatiere('info')">
+                            <i class="fas fa-calculator"></i> Calculer Moyenne Info
+                        </button>
+                    </div>
+                    
+                    <div id="resultat-info" class="resultat matiere">
+                        <i class="fas fa-info-circle"></i> Moyenne Info : -
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-line"></i> Moyenne Générale</h2>
+                <div class="coef-badge">Maths (7) + Info (3)</div>
+            </div>
             
-            <button onclick="calculerMoyenneMatiere('info')">Calculer Moyenne Info</button>
-            <div id="resultat-info" class="resultat matiere">Moyenne Info : -</div>
+            <div class="section-body">
+                <div class="moyennes-inputs">
+                    <div class="moyenne-input-group">
+                        <label for="moyenne-math-input">Moyenne Mathématiques (Coef. 7) :</label>
+                        <input type="number" id="moyenne-math-input" step="0.01" min="0" max="20" placeholder="Moyenne Math" class="moyenne-input" readonly>
+                    </div>
+                    
+                    <div class="moyenne-input-group">
+                        <label for="moyenne-info-input">Moyenne Informatique (Coef. 3) :</label>
+                        <input type="number" id="moyenne-info-input" step="0.01" min="0" max="20" placeholder="Moyenne Info" class="moyenne-input" readonly>
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="reinitialiserTout()">
+                        <i class="fas fa-broom"></i> Tout Réinitialiser
+                    </button>
+                    <button class="btn btn-success" onclick="calculerMoyenneGroupe()">
+                        <i class="fas fa-chart-bar"></i> Calculer Moyenne Générale
+                    </button>
+                </div>
+                
+                <div id="resultat-groupe" class="resultat groupe">
+                    <i class="fas fa-trophy"></i> Moyenne Générale du Groupe : -
+                </div>
+                
+                <div class="progress-container">
+                    <h3>Progression vers la moyenne de 10/20</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-labels">
+                        <span>0</span>
+                        <span>10</span>
+                        <span>20</span>
+                    </div>
+                </div>
+                
+                <div class="stats" id="stats-container">
+                    <!-- Les statistiques seront ajoutées dynamiquement -->
+                </div>
+            </div>
         </div>
     </div>
-    
-    ---
-    
-    <div id="calcul-groupe">
-        <h2>Moyenne Générale du Groupe "Mathématiques et Informatique"</h2>
-        
-        <label for="moyenne-math-input">Moyenne Mathématiques pour l'Ingénieur (Coef. **7,00**) :</label>
-        <input type="number" id="moyenne-math-input" step="0.01" min="0" max="20" placeholder="Note (Moyenne Math)" readonly>
-        
-        <label for="moyenne-info-input">Moyenne Informatique (Coef. **3,00**) :</label>
-        <input type="number" id="moyenne-info-input" step="0.01" min="0" max="20" placeholder="Note (Moyenne Info)" readonly>
-        
-        <button onclick="calculerMoyenneGroupe()">Calculer Moyenne Générale</button>
-        <div id="resultat-groupe" class="resultat groupe">Moyenne Générale du Groupe : -</div>
-    </div>
+
+    <footer>
+        <p>Simulateur de Moyennes Universitaires &copy; 2023 - Conçu pour une expérience optimale</p>
+    </footer>
 </div>
 
 <script>
     // ----------------------------------------------------
-    // Définition des matières/épreuves et de leurs coefficients
+    // Configuration des matières/épreuves et de leurs coefficients
     // ----------------------------------------------------
     const epreuves = {
         math: [
@@ -122,6 +574,9 @@
         ]
     };
 
+    // Variables globales
+    let partialMode = false;
+
     // ----------------------------------------------------
     // Fonction d'initialisation : ajoute dynamiquement les champs HTML
     // ----------------------------------------------------
@@ -130,9 +585,14 @@
         const mathDetailsDiv = document.getElementById('math-details');
         epreuves.math.forEach((epreuve, index) => {
             mathDetailsDiv.innerHTML += `
-                <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                    <label>${epreuve.nom} (Coef ${epreuve.coef.toFixed(2)}) :</label>
-                    <input type="number" id="note-math-${index}" step="0.01" min="0" max="20" placeholder="Note" data-coef="${epreuve.coef}">
+                <div class="epreuve-item">
+                    <div class="epreuve-name">${epreuve.nom}</div>
+                    <div class="epreuve-coef">Coefficient: ${epreuve.coef.toFixed(2)}</div>
+                    <div class="input-group">
+                        <input type="number" id="note-math-${index}" step="0.01" min="0" max="20" placeholder="Note" 
+                               class="note-input" data-coef="${epreuve.coef}" oninput="validerNote(this)">
+                        <span>/20</span>
+                    </div>
                 </div>
             `;
         });
@@ -141,22 +601,66 @@
         const infoDetailsDiv = document.getElementById('info-details');
         epreuves.info.forEach((epreuve, index) => {
             infoDetailsDiv.innerHTML += `
-                <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                    <label>${epreuve.nom} (Coef ${epreuve.coef.toFixed(2)}) :</label>
-                    <input type="number" id="note-info-${index}" step="0.01" min="0" max="20" placeholder="Note" data-coef="${epreuve.coef}">
+                <div class="epreuve-item">
+                    <div class="epreuve-name">${epreuve.nom}</div>
+                    <div class="epreuve-coef">Coefficient: ${epreuve.coef.toFixed(2)}</div>
+                    <div class="input-group">
+                        <input type="number" id="note-info-${index}" step="0.01" min="0" max="20" placeholder="Note" 
+                               class="note-input" data-coef="${epreuve.coef}" oninput="validerNote(this)">
+                        <span>/20</span>
+                    </div>
                 </div>
             `;
+        });
+
+        // Configuration du toggle pour le mode calcul partiel
+        const toggle = document.getElementById('partial-mode');
+        const modeStatus = document.getElementById('mode-status');
+        
+        toggle.addEventListener('change', function() {
+            partialMode = this.checked;
+            modeStatus.textContent = partialMode ? 'Activé' : 'Désactivé';
+            
+            // Mettre à jour l'interface en fonction du mode
+            if (partialMode) {
+                document.querySelectorAll('.note-input').forEach(input => {
+                    input.placeholder = "Note (optionnelle)";
+                });
+            } else {
+                document.querySelectorAll('.note-input').forEach(input => {
+                    input.placeholder = "Note";
+                });
+            }
         });
     }
 
     // ----------------------------------------------------
-    // Fonction pour calculer la moyenne pondérée d'un groupe de matières (Math ou Info)
+    // Fonction pour valider une note saisie
+    // ----------------------------------------------------
+    function validerNote(input) {
+        const value = parseFloat(input.value);
+        
+        if (input.value === "") {
+            input.classList.remove('invalid');
+            return;
+        }
+        
+        if (isNaN(value) || value < 0 || value > 20) {
+            input.classList.add('invalid');
+        } else {
+            input.classList.remove('invalid');
+        }
+    }
+
+    // ----------------------------------------------------
+    // Fonction pour calculer la moyenne pondérée d'un groupe de matières
     // ----------------------------------------------------
     function calculerMoyenneMatiere(type) {
         const epreuvesListe = epreuves[type];
         let sommeProduits = 0;
         let sommeCoefficients = 0;
-        let isComplete = true;
+        let notesRenseignees = 0;
+        let notesManquantes = 0;
 
         epreuvesListe.forEach((epreuve, index) => {
             const inputId = `note-${type}-${index}`;
@@ -164,7 +668,7 @@
             
             // On vérifie si l'utilisateur a rentré une valeur
             if (noteInput.value === "" || isNaN(parseFloat(noteInput.value))) {
-                isComplete = false;
+                notesManquantes++;
                 return; // sort de l'itération actuelle
             }
             
@@ -173,37 +677,55 @@
             
             if (note < 0 || note > 20) {
                  alert(`Veuillez entrer une note valide entre 0 et 20 pour ${epreuve.nom}.`);
-                 isComplete = false;
                  return;
             }
 
             sommeProduits += note * coef;
             sommeCoefficients += coef;
+            notesRenseignees++;
         });
 
         const resultatDiv = document.getElementById(`resultat-${type}`);
         const moyenneInput = document.getElementById(`moyenne-${type}-input`);
 
-        if (!isComplete) {
-            resultatDiv.innerHTML = `⚠️ Veuillez remplir toutes les notes de ${type === 'math' ? 'Mathématiques' : 'Informatique'}.`;
+        // Si aucune note n'est renseignée
+        if (notesRenseignees === 0) {
+            resultatDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Aucune note renseignée pour ${type === 'math' ? 'Mathématiques' : 'Informatique'}.`;
+            moyenneInput.value = "";
+            return;
+        }
+
+        // Si le mode partiel est désactivé et qu'il manque des notes
+        if (!partialMode && notesManquantes > 0) {
+            resultatDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Veuillez remplir toutes les notes de ${type === 'math' ? 'Mathématiques' : 'Informatique'} ou activez le mode calcul partiel.`;
             moyenneInput.value = "";
             return;
         }
 
         if (sommeCoefficients === 0) {
-            resultatDiv.innerHTML = `Erreur : Somme des coefficients nulle.`;
+            resultatDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> Erreur : Somme des coefficients nulle.`;
             moyenneInput.value = "";
             return;
         }
 
         const moyenne = sommeProduits / sommeCoefficients;
+        const pourcentage = (moyenne / 20) * 100;
         
-        resultatDiv.innerHTML = `Moyenne ${type === 'math' ? 'Math' : 'Info'} : **${moyenne.toFixed(2)} / 20**`;
+        let message = `Moyenne ${type === 'math' ? 'Math' : 'Info'} : <strong>${moyenne.toFixed(2)} / 20</strong>`;
+        
+        if (notesManquantes > 0) {
+            message += ` <span style="font-size: 0.9em; color: var(--warning);">(${notesManquantes} note(s) manquante(s))</span>`;
+        }
+        
+        resultatDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
         moyenneInput.value = moyenne.toFixed(2); // Met à jour le champ pour le calcul du groupe
+        
+        // Mettre à jour les statistiques
+        mettreAJourStats();
     }
 
     // ----------------------------------------------------
-    // Fonction pour calculer la moyenne générale du groupe "Mathématiques et Informatique"
+    // Fonction pour calculer la moyenne générale du groupe
     // ----------------------------------------------------
     function calculerMoyenneGroupe() {
         const coefMath = 7.00;
@@ -214,7 +736,7 @@
 
         // On s'assure que les moyennes des sous-groupes ont été calculées
         if (noteMathInput.value === "" || noteInfoInput.value === "") {
-             document.getElementById('resultat-groupe').innerHTML = `⚠️ Veuillez calculer les moyennes de Mathématiques et d'Informatique d'abord.`;
+             document.getElementById('resultat-groupe').innerHTML = `<i class="fas fa-exclamation-triangle"></i> Veuillez calculer les moyennes de Mathématiques et d'Informatique d'abord.`;
              return;
         }
 
@@ -225,14 +747,140 @@
         const sommeCoefficients = coefMath + coefInfo; // 7 + 3 = 10
         
         if (sommeCoefficients === 0) {
-             document.getElementById('resultat-groupe').innerHTML = `Erreur de calcul.`;
+             document.getElementById('resultat-groupe').innerHTML = `<i class="fas fa-exclamation-circle"></i> Erreur de calcul.`;
              return;
         }
         
         const moyenneGenerale = sommeProduits / sommeCoefficients;
+        const pourcentage = (moyenneGenerale / 20) * 100;
+        
+        // Mettre à jour la barre de progression
+        document.getElementById('progress-fill').style.width = `${pourcentage}%`;
+        
+        // Déterminer la couleur en fonction de la moyenne
+        let couleurClasse = '';
+        if (moyenneGenerale >= 10) {
+            couleurClasse = 'style="color: #28a745;"';
+        } else if (moyenneGenerale >= 8) {
+            couleurClasse = 'style="color: #ffc107;"';
+        } else {
+            couleurClasse = 'style="color: #dc3545;"';
+        }
         
         document.getElementById('resultat-groupe').innerHTML = 
-            `Moyenne Générale du Groupe : **${moyenneGenerale.toFixed(2)} / 20**`;
+            `<i class="fas fa-trophy"></i> Moyenne Générale du Groupe : <strong ${couleurClasse}>${moyenneGenerale.toFixed(2)} / 20</strong>`;
+        
+        // Mettre à jour les statistiques
+        mettreAJourStats();
+    }
+
+    // ----------------------------------------------------
+    // Fonction pour réinitialiser une matière
+    // ----------------------------------------------------
+    function reinitialiserMatiere(type) {
+        const epreuvesListe = epreuves[type];
+        
+        epreuvesListe.forEach((epreuve, index) => {
+            const inputId = `note-${type}-${index}`;
+            const noteInput = document.getElementById(inputId);
+            noteInput.value = "";
+            noteInput.classList.remove('invalid');
+        });
+        
+        document.getElementById(`resultat-${type}`).innerHTML = `<i class="fas fa-info-circle"></i> Moyenne ${type === 'math' ? 'Math' : 'Info'} : -`;
+        document.getElementById(`moyenne-${type}-input`).value = "";
+        
+        // Mettre à jour les statistiques
+        mettreAJourStats();
+    }
+
+    // ----------------------------------------------------
+    // Fonction pour tout réinitialiser
+    // ----------------------------------------------------
+    function reinitialiserTout() {
+        reinitialiserMatiere('math');
+        reinitialiserMatiere('info');
+        
+        document.getElementById('resultat-groupe').innerHTML = `<i class="fas fa-trophy"></i> Moyenne Générale du Groupe : -`;
+        document.getElementById('progress-fill').style.width = '0%';
+        
+        // Réinitialiser les statistiques
+        document.getElementById('stats-container').innerHTML = '';
+    }
+
+    // ----------------------------------------------------
+    // Fonction pour mettre à jour les statistiques
+    // ----------------------------------------------------
+    function mettreAJourStats() {
+        const statsContainer = document.getElementById('stats-container');
+        let statsHTML = '';
+        
+        // Calculer le nombre total de notes renseignées
+        let totalNotes = 0;
+        let notesRenseignees = 0;
+        
+        for (const type in epreuves) {
+            totalNotes += epreuves[type].length;
+            
+            epreuves[type].forEach((epreuve, index) => {
+                const inputId = `note-${type}-${index}`;
+                const noteInput = document.getElementById(inputId);
+                
+                if (noteInput.value !== "" && !isNaN(parseFloat(noteInput.value))) {
+                    notesRenseignees++;
+                }
+            });
+        }
+        
+        // Calculer la moyenne générale si disponible
+        const moyenneMathInput = document.getElementById('moyenne-math-input');
+        const moyenneInfoInput = document.getElementById('moyenne-info-input');
+        let moyenneGenerale = null;
+        
+        if (moyenneMathInput.value !== "" && moyenneInfoInput.value !== "") {
+            const noteMath = parseFloat(moyenneMathInput.value);
+            const noteInfo = parseFloat(moyenneInfoInput.value);
+            moyenneGenerale = (noteMath * 7 + noteInfo * 3) / 10;
+        }
+        
+        // Générer les cartes de statistiques
+        statsHTML += `
+            <div class="stat-card">
+                <div class="stat-label">Notes Renseignées</div>
+                <div class="stat-value">${notesRenseignees}/${totalNotes}</div>
+            </div>
+        `;
+        
+        if (moyenneMathInput.value !== "") {
+            const noteMath = parseFloat(moyenneMathInput.value);
+            statsHTML += `
+                <div class="stat-card">
+                    <div class="stat-label">Moyenne Maths</div>
+                    <div class="stat-value">${noteMath.toFixed(2)}</div>
+                </div>
+            `;
+        }
+        
+        if (moyenneInfoInput.value !== "") {
+            const noteInfo = parseFloat(moyenneInfoInput.value);
+            statsHTML += `
+                <div class="stat-card">
+                    <div class="stat-label">Moyenne Info</div>
+                    <div class="stat-value">${noteInfo.toFixed(2)}</div>
+                </div>
+            `;
+        }
+        
+        if (moyenneGenerale !== null) {
+            statsHTML += `
+                <div class="stat-card">
+                    <div class="stat-label">Moyenne Générale</div>
+                    <div class="stat-value">${moyenneGenerale.toFixed(2)}</div>
+                </div>
+            `;
+        }
+        
+        statsContainer.innerHTML = statsHTML;
     }
 
     // Lance l'initialisation des champs dès que la page est chargée
