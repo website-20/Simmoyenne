@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulateur de Moyennes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #333;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 5px;
+            margin-top: 20px;
+        }
+        .matiere-group {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 80px;
+        }
+        .resultat {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .resultat.matiere {
+            background-color: #e6f7ff;
+            color: #0056b3;
+        }
+        .resultat.groupe {
+            background-color: #e6ffe6;
+            color: #28a745;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📝 Simulateur de Moyennes</h1>
+    
+    <div id="calcul-matieres">
+        <h2>Mathématiques et Informatique</h2>
+        
+        <div class="matiere-group">
+            <h3>Mathématiques pour l'Ingénieur (Coefficient total du groupe Math : 7)</h3>
+            
+            <div id="math-details">
+                </div>
+            
+            <button onclick="calculerMoyenneMatiere('math')">Calculer Moyenne Math</button>
+            <div id="resultat-math" class="resultat matiere">Moyenne Math : -</div>
+        </div>
+
+        <div class="matiere-group">
+            <h3>Informatique (Coefficient total du groupe Info : 3)</h3>
+            
+            <div id="info-details">
+                </div>
+            
+            <button onclick="calculerMoyenneMatiere('info')">Calculer Moyenne Info</button>
+            <div id="resultat-info" class="resultat matiere">Moyenne Info : -</div>
+        </div>
+    </div>
+    
+    ---
+    
+    <div id="calcul-groupe">
+        <h2>Moyenne Générale du Groupe "Mathématiques et Informatique"</h2>
+        
+        <label for="moyenne-math-input">Moyenne Mathématiques pour l'Ingénieur (Coef. **7,00**) :</label>
+        <input type="number" id="moyenne-math-input" step="0.01" min="0" max="20" placeholder="Note (Moyenne Math)" readonly>
+        
+        <label for="moyenne-info-input">Moyenne Informatique (Coef. **3,00**) :</label>
+        <input type="number" id="moyenne-info-input" step="0.01" min="0" max="20" placeholder="Note (Moyenne Info)" readonly>
+        
+        <button onclick="calculerMoyenneGroupe()">Calculer Moyenne Générale</button>
+        <div id="resultat-groupe" class="resultat groupe">Moyenne Générale du Groupe : -</div>
+    </div>
+</div>
+
+<script>
+    // ----------------------------------------------------
+    // Définition des matières/épreuves et de leurs coefficients
+    // ----------------------------------------------------
+    const epreuves = {
+        math: [
+            { nom: "Mathématiques pour l'Ingénieur (+ Contrôle Continu)", coef: 1.00 },
+            { nom: "Mathématiques pour l'Ingénieur (DS1)", coef: 2.00 },
+            { nom: "Mathématiques pour l'Ingénieur (DS2)", coef: 2.00 },
+            { nom: "Mathématiques pour l'Ingénieur (DS3)", coef: 2.00 }
+        ],
+        info: [
+            { nom: "Informatique (Devoir Surveillé)", coef: 2.00 },
+            { nom: "Informatique (Contrôle Continu)", coef: 1.00 }
+        ]
+    };
+
+    // ----------------------------------------------------
+    // Fonction d'initialisation : ajoute dynamiquement les champs HTML
+    // ----------------------------------------------------
+    function initialiserChamps() {
+        // Initialisation pour les Maths
+        const mathDetailsDiv = document.getElementById('math-details');
+        epreuves.math.forEach((epreuve, index) => {
+            mathDetailsDiv.innerHTML += `
+                <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                    <label>${epreuve.nom} (Coef ${epreuve.coef.toFixed(2)}) :</label>
+                    <input type="number" id="note-math-${index}" step="0.01" min="0" max="20" placeholder="Note" data-coef="${epreuve.coef}">
+                </div>
+            `;
+        });
+
+        // Initialisation pour l'Informatique
+        const infoDetailsDiv = document.getElementById('info-details');
+        epreuves.info.forEach((epreuve, index) => {
+            infoDetailsDiv.innerHTML += `
+                <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                    <label>${epreuve.nom} (Coef ${epreuve.coef.toFixed(2)}) :</label>
+                    <input type="number" id="note-info-${index}" step="0.01" min="0" max="20" placeholder="Note" data-coef="${epreuve.coef}">
+                </div>
+            `;
+        });
+    }
+
+    // ----------------------------------------------------
+    // Fonction pour calculer la moyenne pondérée d'un groupe de matières (Math ou Info)
+    // ----------------------------------------------------
+    function calculerMoyenneMatiere(type) {
+        const epreuvesListe = epreuves[type];
+        let sommeProduits = 0;
+        let sommeCoefficients = 0;
+        let isComplete = true;
+
+        epreuvesListe.forEach((epreuve, index) => {
+            const inputId = `note-${type}-${index}`;
+            const noteInput = document.getElementById(inputId);
+            
+            // On vérifie si l'utilisateur a rentré une valeur
+            if (noteInput.value === "" || isNaN(parseFloat(noteInput.value))) {
+                isComplete = false;
+                return; // sort de l'itération actuelle
+            }
+            
+            const note = parseFloat(noteInput.value);
+            const coef = epreuve.coef;
+            
+            if (note < 0 || note > 20) {
+                 alert(`Veuillez entrer une note valide entre 0 et 20 pour ${epreuve.nom}.`);
+                 isComplete = false;
+                 return;
+            }
+
+            sommeProduits += note * coef;
+            sommeCoefficients += coef;
+        });
+
+        const resultatDiv = document.getElementById(`resultat-${type}`);
+        const moyenneInput = document.getElementById(`moyenne-${type}-input`);
+
+        if (!isComplete) {
+            resultatDiv.innerHTML = `⚠️ Veuillez remplir toutes les notes de ${type === 'math' ? 'Mathématiques' : 'Informatique'}.`;
+            moyenneInput.value = "";
+            return;
+        }
+
+        if (sommeCoefficients === 0) {
+            resultatDiv.innerHTML = `Erreur : Somme des coefficients nulle.`;
+            moyenneInput.value = "";
+            return;
+        }
+
+        const moyenne = sommeProduits / sommeCoefficients;
+        
+        resultatDiv.innerHTML = `Moyenne ${type === 'math' ? 'Math' : 'Info'} : **${moyenne.toFixed(2)} / 20**`;
+        moyenneInput.value = moyenne.toFixed(2); // Met à jour le champ pour le calcul du groupe
+    }
+
+    // ----------------------------------------------------
+    // Fonction pour calculer la moyenne générale du groupe "Mathématiques et Informatique"
+    // ----------------------------------------------------
+    function calculerMoyenneGroupe() {
+        const coefMath = 7.00;
+        const coefInfo = 3.00;
+        
+        const noteMathInput = document.getElementById('moyenne-math-input');
+        const noteInfoInput = document.getElementById('moyenne-info-input');
+
+        // On s'assure que les moyennes des sous-groupes ont été calculées
+        if (noteMathInput.value === "" || noteInfoInput.value === "") {
+             document.getElementById('resultat-groupe').innerHTML = `⚠️ Veuillez calculer les moyennes de Mathématiques et d'Informatique d'abord.`;
+             return;
+        }
+
+        const noteMath = parseFloat(noteMathInput.value);
+        const noteInfo = parseFloat(noteInfoInput.value);
+        
+        const sommeProduits = (noteMath * coefMath) + (noteInfo * coefInfo);
+        const sommeCoefficients = coefMath + coefInfo; // 7 + 3 = 10
+        
+        if (sommeCoefficients === 0) {
+             document.getElementById('resultat-groupe').innerHTML = `Erreur de calcul.`;
+             return;
+        }
+        
+        const moyenneGenerale = sommeProduits / sommeCoefficients;
+        
+        document.getElementById('resultat-groupe').innerHTML = 
+            `Moyenne Générale du Groupe : **${moyenneGenerale.toFixed(2)} / 20**`;
+    }
+
+    // Lance l'initialisation des champs dès que la page est chargée
+    window.onload = initialiserChamps;
+</script>
+
+</body>
+</html>
